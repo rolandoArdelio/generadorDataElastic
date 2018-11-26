@@ -1,0 +1,25 @@
+plugins {
+    id 'java-library'
+    id 'application'
+    id 'eclipse'
+}
+
+repositories {
+    mavenCentral()  
+}
+
+dependencies {
+	compile 'org.elasticsearch.client:elasticsearch-rest-high-level-client:6.4.2'
+    testImplementation 'junit:junit:4.12'
+}
+
+mainClassName = 'correlacionador.generator.Generator'
+
+task jarall(type: Jar) {
+	manifest { attributes 'Main-Class': 'correlacionador.generator.Generator' }
+    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+	exclude('META-INF/*.SF')
+	exclude('META-INF/*.DSA')
+	exclude('META-INF/*.RSA')
+    with jar
+}
