@@ -44,7 +44,13 @@ public class Generator {
 		ArrayList<Integer> notHonoredResponseCodeEvery = new ArrayList<Integer>();
 		ArrayList<Integer> suspiciousResponseCodeEvery = new ArrayList<Integer>();
 		ArrayList<Integer> declinedResponseCodeEvery = new ArrayList<Integer>();
-		ArrayList<String> serverIp = new ArrayList<String>();
+		ArrayList<String> serverIpArray = new ArrayList<String>();
+		ArrayList<Integer> serverRange = new ArrayList<Integer>();
+		ArrayList<String> appsArray = new ArrayList<String>();
+		ArrayList<Integer> timeOperativeArray = new ArrayList<Integer>();
+		ArrayList<Integer> dataCostArray = new ArrayList<Integer>();
+		ArrayList<String> urlsVisitedArray = new ArrayList<String>();
+		ArrayList<String> userNameArray = new ArrayList<String>();
 
 		Random random = new Random(System.currentTimeMillis());
 		ArrayList<String> responseCodes = new ArrayList<String>(Arrays.asList("00", "01", "02", "03", "04", "05", "06",
@@ -131,8 +137,28 @@ public class Generator {
 			for (String string : prop.getProperty("generator.declined-response-code-every").trim().split(":")) {
 				declinedResponseCodeEvery.add(Integer.valueOf(string));
 			}
+			//test
 			for (String string : prop.getProperty("generator.server-ip").trim().split(":")) {
-				serverIp.add(string);
+				serverIpArray.add(string);
+			}
+
+			for (String string : prop.getProperty("generator.server-range").trim().split(":")) {
+				serverRange.add(Integer.valueOf(string));
+			}
+			for (String string : prop.getProperty("generator.Apps").trim().split(":")) {
+				appsArray.add(string);
+			}
+			for (String string : prop.getProperty("generator.time-operative").trim().split(":")) {
+				timeOperativeArray.add(Integer.valueOf(string));
+			}
+			for (String string : prop.getProperty("generator.data-cost").trim().split(":")) {
+				dataCostArray.add(Integer.valueOf(string));
+			}
+			for (String string : prop.getProperty("generator.urls-visited").trim().split(",")) {
+				urlsVisitedArray.add(string);
+			}
+			for (String string : prop.getProperty("generator.user-name").trim().split(":")) {
+				userNameArray.add(string);
 			}
 
 		}
@@ -205,7 +231,13 @@ public class Generator {
 		String bin;
 		String issuer;
 		String product;
+		//test
 		String hostIp;
+		String apps;
+		int timeOperative;
+		int datacost;
+		String urlsVisited;
+		String userName;
 		Msg() {
 
 			yearMonth = new SimpleDateFormat("yyyyMM").format(new Date(props.start));
@@ -264,23 +296,52 @@ public class Generator {
 			bin = props.issuerProduct.get(x).split(":")[0];
 			issuer = props.issuerProduct.get(x).split(":")[1];
 			product = props.issuerProduct.get(x).split(":")[2];
-			hostIp= props.serverIp.get(x).split(":")[0];
+			//ip
+			x = props.random.nextInt(props.serverIpArray.size());
+			hostIp= props.serverIpArray.get(x).split(":")[0];
+
+			hostIp+="" + (props.random
+					.nextInt(props.serverRange.get(1) - props.serverRange.get(0))
+					+ props.serverRange.get(0) + 1);
+			//urlsVisited
+			x= props.random.nextInt(props.urlsVisitedArray.size());
+			urlsVisited=props.urlsVisitedArray.get(x).split(",")[0];
+			//apps
+			x = props.random.nextInt(props.appsArray.size());
+			apps= props.appsArray.get(x).split(":")[0];
+			//time operativo
+			timeOperative = props.random
+					.nextInt(props.timeOperativeArray.get(1) - props.timeOperativeArray.get(0))
+					+ props.timeOperativeArray.get(0) + 1;
+			//data costo
+			datacost= props.random
+					.nextInt(props.dataCostArray.get(1) - props.dataCostArray.get(0))
+					+ props.dataCostArray.get(0) + 1;
+			//nombre usuario
+			x = props.random.nextInt(props.userNameArray.size());
+			userName= props.userNameArray.get(x).split(":")[0];
+
 			if (props.logDocuments) {
-				LOGGER.info(":::");
-				LOGGER.info("::: YRMONTH:  " + yearMonth);
-				LOGGER.info("::: DAY:      " + day);
-				LOGGER.info("::: MTI REQ:  " + mtiRequest);
-				LOGGER.info("::: MTI RES:  " + mtiResponse);
-				LOGGER.info("::: RESPCODE: " + responseCode);
-				LOGGER.info("::: KEY:      " + key);
-				LOGGER.info("::: TYPE:     " + type);
-				LOGGER.info("::: START:    " + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSSS").format(start));
-				LOGGER.info("::: RESPTIME: " + responseTime);
-				LOGGER.info("::: BIN:      " + bin);
-				LOGGER.info("::: ISSUER:   " + issuer);
-				LOGGER.info("::: PRODUCT:  " + product);
-				LOGGER.info("::: PRODUCT:  " + hostIp);
-				LOGGER.info(":::");
+				LOGGER.info("::::::"
+				+" :: YRMONTH:  " + yearMonth
+				+" :: DAY:      " + day
+				+" :: MTI REQ:  " + mtiRequest
+				+" :: MTI RES:  " + mtiResponse
+				+" :: RESPCODE: " + responseCode
+				+" :: KEY:      " + key
+				+" :: TYPE:     " + type
+				+" :: START:    " + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSSS").format(start)
+				+" :: RESPTIME: " + responseTime
+				+" :: BIN:      " + bin
+				+" :: ISSUER:   " + issuer
+				+" :: PRODUCT:  " + product
+				+" :: host:  " + hostIp
+				+" :: apps:  " + apps
+				+" :: timeOpe:  " + timeOperative
+				+" :: Datacost:  " + datacost
+				+" :: URLS:  " + urlsVisited
+				+" :: UserName:  " + userName
+				+" ::");
 			}
 		}
 	}
@@ -405,29 +466,107 @@ public class Generator {
                         builder.field("type", "date");
                     }
                     builder.endObject();
-                    builder.startObject("response_time");
-                    {
-                        builder.field("type", "integer");
-                    }
-                    builder.endObject();
 
-                    builder.startObject("user");
-                    {
-                        builder.field("type", "keyword");
-                    }
-                    builder.endObject();
+					///datos ya instalados
 
-                    builder.startObject("product");
-                    {
-                        builder.field("type", "keyword");
-                    }
-                    builder.endObject();
+					builder.startObject("year_month");
+					{
+						builder.field("type", "keyword");
+					}
+					builder.endObject();
+
+					builder.startObject("day");
+					{
+						builder.field("type", "keyword");
+					}
+					builder.endObject();
+
+					builder.startObject("mti_request");
+					{
+						builder.field("type", "keyword");
+					}
+					builder.endObject();
+
+					builder.startObject("mti_response");
+					{
+						builder.field("type", "keyword");
+					}
+					builder.endObject();
+
+					builder.startObject("response_code");
+					{
+						builder.field("type", "keyword");
+					}
+					builder.endObject();
+
+					builder.startObject("key");
+					{
+						builder.field("type", "keyword");
+					}
+					builder.endObject();
+
+					builder.startObject("type");
+					{
+						builder.field("type", "keyword");
+					}
+					builder.endObject();
+
+					builder.startObject("response_time");
+					{
+						builder.field("type", "integer");
+					}
+					builder.endObject();
+
+					builder.startObject("bin");
+					{
+						builder.field("type", "keyword");
+					}
+					builder.endObject();
+
+					builder.startObject("issuer");
+					{
+						builder.field("type", "keyword");
+					}
+					builder.endObject();
+
+					builder.startObject("product");
+					{
+						builder.field("type", "keyword");
+					}
+					builder.endObject();
+
+                	//test
 
                     builder.startObject("host");
                     {
                         builder.field("type", "ip");
                     }
                     builder.endObject();
+					builder.startObject("apps");
+					{
+						builder.field("type", "keyword");
+					}
+					builder.endObject();
+					builder.startObject("timeoperative");
+					{
+						builder.field("type", "integer");
+					}
+					builder.endObject();
+					builder.startObject("datacost");
+					{
+						builder.field("type", "integer");
+					}
+					builder.endObject();
+					builder.startObject("urlsvisited");
+					{
+						builder.field("type", "keyword");
+					}
+					builder.endObject();
+					builder.startObject("username");
+					{
+						builder.field("type", "keyword");
+					}
+					builder.endObject();
                 }
                 builder.endObject();
 
@@ -444,10 +583,25 @@ public class Generator {
 		builder.startObject();
 		{
             builder.field("@timestamp", new Date());
+			builder.field("year_month", msg.yearMonth);
+			builder.field("day", msg.day);
+			builder.field("mti_request", msg.mtiRequest);
+			builder.field("mti_response", msg.mtiResponse);
+			builder.field("response_code", msg.responseCode);
+			builder.field("key", msg.key);
+			builder.field("type", msg.type);
+			builder.timeField("start", msg.start);
 			builder.field("response_time", msg.responseTime);
-			builder.field("user", msg.bin);
+			builder.field("bin", msg.bin);
+			builder.field("issuer", msg.issuer);
 			builder.field("product", msg.product);
+			//test
 			builder.field("host", msg.hostIp);
+			builder.field("apps", msg.apps);
+			builder.field("timeoperative", msg.timeOperative);
+			builder.field("datacost", msg.datacost);
+			builder.field("urlsvisited", msg.urlsVisited);
+			builder.field("username", msg.userName);
 		}
 		builder.endObject();
 		IndexRequest request = new IndexRequest(props.indexName, "_doc", msg.key).source(builder);
